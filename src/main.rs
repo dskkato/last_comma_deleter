@@ -1,11 +1,11 @@
 use std::env;
-use std::fs::{File, OpenOptions};
+use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader, BufWriter, Write};
 
 fn main() -> io::Result<()> {
     let fname: Vec<String> = env::args().skip(1).collect();
-    if fname.len() < 2 {
+    if fname.len() != 2 {
         panic!("sample SRC OUT");
     };
 
@@ -17,18 +17,13 @@ fn main() -> io::Result<()> {
     let src = File::open(src)?;
     let reader = BufReader::new(src);
 
-    let out = OpenOptions::new()
-        .write(true)
-        .create(true)
-        .open(out)
-        .unwrap();
+    let out = File::create(out)?;
     let mut writer = BufWriter::new(out);
 
     for line in reader.lines() {
         let line = line.unwrap();
         let index = line.rfind(',').unwrap();
-        writer.write_all(line[..index].as_bytes())?;
-        writer.write_all(b"\n")?;
+        writeln!(writer, "{}", &line[..index])?;
     }
 
     Ok(())
